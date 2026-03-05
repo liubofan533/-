@@ -314,10 +314,10 @@ function calculateAll() {
     });
     document.getElementById('total-fixed').textContent = `${totalFixed.toFixed(2)} 元`;
 
-    const personalAmount = totalAccounts - totalFixed;
+    const personalAmount = totalAccounts - totalFixed - remainClaim;
     document.getElementById('personal-amount').textContent = `${personalAmount.toFixed(2)} 元`;
 
-    const accountTotalAmount = totalAccounts - totalReimbursement + remainClaim - totalClaimItems;
+    const accountTotalAmount = totalAccounts - totalReimbursement - totalClaimItems;
     document.getElementById('disposable-balance').textContent = `${accountTotalAmount.toFixed(2)} 元`;
 
     const currentDate = parseInt(document.getElementById('current-date').value) || new Date().getDate();
@@ -821,4 +821,5 @@ function testAPIConnection() {
         console.error('API测试失败:', error);
         showToast('API连接失败，请检查配置', 'error');
     });
+
 }
