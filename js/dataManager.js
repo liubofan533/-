@@ -97,10 +97,11 @@ const DataManager = {
         newRow.innerHTML = `
             <input type="text" class="item-name" placeholder="项目名称" value="${name}" oninput="calculateAll()">
             <input type="number" class="item-amount reimbursement-input" value="${amount}" step="0.01" placeholder="金额" oninput="calculateAll()">
+            <button class="item-reimburse" onclick="reimburseItem(this)">核销</button>
             <button class="item-delete" onclick="deleteRow(this)">×</button>
         `;
         container.insertBefore(newRow, totalRow);
-        calculateAll(); // 触发重新计算
+        calculateAll();
         return id;
     },
 
@@ -264,5 +265,6 @@ const DataManager = {
         return this.deleteItemById(type, item.id);
     },
 };
+
 
 window.DataManager = DataManager;
