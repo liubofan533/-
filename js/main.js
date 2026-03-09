@@ -241,7 +241,7 @@ function calculateAll() {
     });
     document.getElementById('total-fixed').textContent = `${totalFixed.toFixed(2)} 元`;
 
-    const personalAmount = totalAccounts - totalFixed - remainClaim;
+    const personalAmount = totalAccounts - totalFixed - totalClaimItems;
     document.getElementById('personal-amount').textContent = `${personalAmount.toFixed(2)} 元`;
 
     const accountTotalAmount = totalAccounts - totalReimbursement - totalClaimItems;
@@ -775,4 +775,5 @@ window.showToast = showToast;
 window.sendAIMessage = sendAIMessage;
 window.clearAIConversation = clearAIConversation;
 window.testAPIConnection = testAPIConnection;
+
 window.reimburseItem = reimburseItem;
