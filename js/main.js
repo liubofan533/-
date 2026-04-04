@@ -241,10 +241,10 @@ function calculateAll() {
     });
     document.getElementById('total-fixed').textContent = `${totalFixed.toFixed(2)} 元`;
 
-    const personalAmount = totalAccounts - totalFixed - totalClaim;
+    const personalAmount = totalAccounts - totalFixed - remainClaim;
     document.getElementById('personal-amount').textContent = `${personalAmount.toFixed(2)} 元`;
 
-    const accountTotalAmount = totalAccounts - totalReimbursement - totalClaimItems;
+    const accountTotalAmount = totalAccounts ;
     document.getElementById('disposable-balance').textContent = `${accountTotalAmount.toFixed(2)} 元`;
 
     const currentDate = parseInt(document.getElementById('current-date').value) || new Date().getDate();
