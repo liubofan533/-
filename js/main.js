@@ -160,18 +160,15 @@ function addRow(type) {
 
     const newRow = document.createElement('div');
     newRow.className = 'item-row';
-    const id = DataManager.generateId(); // 使用DataManager的生成ID
+    const id = DataManager.generateId();
     newRow.dataset.id = id;
-    // 根据类型决定是否添加核销按钮
     let extraButton = '';
     if (type === 'reimbursement') {
         extraButton = `<button class="item-reimburse" onclick="reimburseItem(this)">核销</button>`;
     }
-    newRow.innerHTML = `
-        <input type="text" class="item-name" placeholder="项目名称" oninput="calculateAll()">
-        <input type="number" class="item-amount ${inputClass}" value="0.00" step="0.01" placeholder="金额" oninput="calculateAll()">
-        ${extraButton}
-        <button class="item-delete" onclick="deleteRow(this)">×</button>
+    newRow.innerHTML = `        <input type="text" class="item-name" placeholder="项目名称" oninput="calculateAll()">
+        <input type="number" class="item-amount ${inputClass}" value="0.00" step="0.01" placeholder="金额" oninput="handleClaimInput(this, '${type}')">
+        ${extraButton}        <button class="item-delete" onclick="deleteRow(this)">×</button>
     `;
 
     if (insertTarget) {
@@ -194,6 +191,15 @@ function deleteRow(btn) {
         showToast('至少保留一项', 'error');
         return;
     }
+
+    const amountInput = row.querySelector('.claim-input');
+    if (amountInput) {
+        const amount = parseFloat(amountInput.value) || 0;
+        if (amount > 0) {
+            refundToBankCard(amount);
+        }
+    }
+
     row.remove();
     calculateAll();
     showToast('已删除该项', 'success');
@@ -244,7 +250,7 @@ function calculateAll() {
     const personalAmount = totalAccounts - totalFixed - remainClaim;
     document.getElementById('personal-amount').textContent = `${personalAmount.toFixed(2)} 元`;
 
-    const accountTotalAmount = totalAccounts ;
+    const accountTotalAmount = totalAccounts;
     document.getElementById('disposable-balance').textContent = `${accountTotalAmount.toFixed(2)} 元`;
 
     const currentDate = parseInt(document.getElementById('current-date').value) || new Date().getDate();
@@ -761,6 +767,58 @@ function testAPIConnection() {
         showToast('API连接失败，请检查配置', 'error');
     });
 }
+
+function handleClaimInput(input, type) {
+    if (type !== 'claim') {
+        calculateAll();
+        return;
+    }
+
+    const oldValue = parseFloat(input.dataset.previousValue) || 0;
+    const newValue = parseFloat(input.value) || 0;
+    const diff = newValue - oldValue;
+
+    if (diff !== 0) {
+        adjustBankBalance(-diff);
+    }
+
+    input.dataset.previousValue = newValue;
+    calculateAll();
+}
+
+function adjustBankBalance(amount) {
+    const accountInputs = document.querySelectorAll('.account-input');
+    let bankCardInput = null;
+
+    for (let item of accountInputs) {
+        const label = item.closest('.data-item')?.querySelector('.data-label');
+        if (label && label.textContent.includes('银行卡余额')) {
+            bankCardInput = item;
+            break;
+        }
+    }
+
+    if (!bankCardInput) {
+        showToast('未找到银行卡余额输入框', 'error');
+        return;
+    }
+
+    let currentBalance = parseFloat(bankCardInput.value) || 0;
+    let newBalance = currentBalance + amount;
+
+    if (newBalance < 0) {
+        showToast('银行卡余额不足', 'error');
+        bankCardInput.value = currentBalance.toFixed(2);
+        return;
+    }
+
+    bankCardInput.value = newBalance.toFixed(2);
+    bankCardInput.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+
+
+
 
 // 将全局函数挂载到window，以便HTML事件调用
 window.switchTab = switchTab;
